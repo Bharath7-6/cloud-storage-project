@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
 import os
 import json
 
 app = Flask(__name__)
+CORS(app)
 
 UPLOAD_FOLDER = "uploads"
 USER_DB = "users.json"
 
+# Ensure required folders and files exist
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
@@ -59,6 +62,7 @@ def login():
 
 @app.route("/upload/<username>", methods=["POST"])
 def upload(username):
+
     if "file" not in request.files:
         return jsonify({"message": "No file part"}), 400
 
@@ -72,21 +76,46 @@ def upload(username):
     return jsonify({"message": "File uploaded successfully"})
 
 
+# 🔥 FIXED LIST FILES ENDPOINT
 @app.route("/files/<username>")
 def list_files(username):
+
     user_folder = os.path.join(UPLOAD_FOLDER, username)
 
     if not os.path.exists(user_folder):
         return jsonify([])
 
     files = os.listdir(user_folder)
-    return jsonify(files)
+
+    file_list = []
+
+    for f in files:
+        file_list.append({
+            "name": f
+        })
+
+    return jsonify(file_list)
 
 
 @app.route("/download/<username>/<filename>")
 def download(username, filename):
+
     user_folder = os.path.join(UPLOAD_FOLDER, username)
     return send_from_directory(user_folder, filename)
+
+
+# 🔥 FIXED DELETE ENDPOINT
+@app.route("/delete/<username>/<filename>", methods=["DELETE"])
+def delete_file(username, filename):
+
+    user_folder = os.path.join(UPLOAD_FOLDER, username)
+    file_path = os.path.join(user_folder, filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return jsonify({"message": "File deleted successfully"})
+    else:
+        return jsonify({"message": "File not found"}), 404
 
 
 if __name__ == "__main__":
