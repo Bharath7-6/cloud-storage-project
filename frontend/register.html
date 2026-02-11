@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register - Cloud Storage</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    text-align: center;
+    padding-top: 60px;
+}
+
+.box {
+    background: white;
+    width: 350px;
+    margin: auto;
+    padding: 25px;
+    border-radius: 10px;
+}
+
+input {
+    width: 90%;
+    padding: 10px;
+    margin: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    background: #2a5298;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #1e3c72;
+}
+
+a {
+    text-decoration: none;
+    color: blue;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>User Registration</h2>
+
+<input type="text" id="username" placeholder="Username"><br>
+
+<input type="password" id="password" placeholder="Password"><br>
+
+<button onclick="register()">Register</button>
+
+<p id="msg"></p>
+
+<p>
+Already have account? 
+<a href="login.html">Login here</a>
+</p>
+
+</div>
+
+<script>
+
+const API = "http://127.0.0.1:5000";
+
+function register() {
+
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+
+    fetch(API + "/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        document.getElementById("msg").innerText = data.message;
+
+        if(data.message.includes("successfully")) {
+            setTimeout(() => {
+                window.location.href = "login.html";
+            }, 1000);
+        }
+    });
+}
+
+</script>
+
+</body>
+</html>
